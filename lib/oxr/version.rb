@@ -1,3 +1,3 @@
-module OXR
+class OXR
   VERSION = "0.1.0"
 end
