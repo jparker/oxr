@@ -28,7 +28,7 @@ Instantiate a new OXR object, passing your App ID as an argument.
 oxr = OXR.new 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ```
 
-The Open Exchange Rates API returns results as JSON objects. OXR parses these (using the [json](https://rubygems.org/gems/json)) and returns the resulting Hashes.
+The Open Exchange Rates API returns results as JSON objects. OXR parses these (using the [json](https://rubygems.org/gems/json)) and returns the resulting Hashes. To see the exact structure of the responses for different queries, check the [Open Exchange Rates documentation](https://docs.openexchangerates.org/) or examine the sample responses in `test/fixtures`.
 
 Get the latest conversion rates with `OXR#latest`.
 
