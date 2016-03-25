@@ -1,3 +1,5 @@
+# [![Gem Version](https://badge.fury.io/rb/oxr.svg)](https://badge.fury.io/rb/oxr) [![Build Status](https://travis-ci.org/jparker/oxr.svg?branch=master)](https://travis-ci.org/jparker/oxr)
+
 # OXR
 
 This gem provides a basic interface to the [Open Exchange Rates](https://openexchangerates.org) API.
