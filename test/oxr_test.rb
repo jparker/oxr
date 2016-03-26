@@ -16,6 +16,14 @@ class OXRTest < Minitest::Test
     refute_nil response['rates']['GBP']
   end
 
+  def test_latest_with_custom_source
+    OXR.sources[:latest] = 'test/fixtures/fantasy.json'
+    response = OXR.new('XXX').latest
+    assert_equal 42, response['rates']['GBP']
+  ensure
+    OXR.reset_sources
+  end
+
   def test_historical
     stub_request(:get, "#{OXR::BASE_PATH}historical/2015-06-14.json?app_id=XXX")
       .to_return status: 200, body: File.open('test/fixtures/historical.json')
@@ -25,6 +33,14 @@ class OXRTest < Minitest::Test
     assert_equal 'USD', response['base']
     assert_equal 1, response['rates']['USD']
     refute_nil response['rates']['GBP']
+  end
+
+  def test_historical_with_custom_source
+    OXR.sources[:historical] = 'test/fixtures/fantasy.json'
+    response = OXR.new('XXX').historical on: Date.new(2015, 6, 14)
+    assert_equal 42, response['rates']['GBP']
+  ensure
+    OXR.reset_sources
   end
 
   def test_currencies

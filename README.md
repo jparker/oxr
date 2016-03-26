@@ -56,6 +56,29 @@ Get information about your account (including your usage for the current period)
 oxr.usage
 ```
 
+## Testing
+
+Normally, any API call will result in a live request to Open Exchange Rates. This probably isn't what you want when you're running tests. You can optionally stub the responses of specific API calls by adding an entry to `OXR.sources`. If you want to stop using custom sources, you can restore normal behavior by calling `OXR.reset_sources`. For example:
+
+```ruby
+class SomeTest < Minitest::Test
+  def setup
+    OXR.sources[:latest] = 'test/fixtures/sample_data.json'
+  end
+
+  def teardown
+    OXR.reset_sources
+  end
+
+  def test_something
+    oxr = OXR.new('XXX')
+    assert_equal 42, oxr.latest['rates']['GBP']
+  end
+end
+```
+
+In this example `test/fixtures/sample_data.json` should contain JSON data matching the structure of an actual Open Exchange Rates response. If you want to stop using custom sources, you can restore normal behavior by calling `OXR.reset_sources`.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

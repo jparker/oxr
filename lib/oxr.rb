@@ -22,40 +22,34 @@ class OXR
 
   attr_reader :app_id
 
-  def latest(only: nil, endpoint: nil)
-    endpoint ||= URI.join(BASE_PATH, 'latest.json').tap { |uri|
-      uri.query  = "app_id=#{app_id}"
-      uri.query += "&symbols=#{Array(only).join ','}" if only
-    }
+  def latest
+    endpoint = sources[:latest] || build_uri_endpoint('latest.json')
     call endpoint
   end
 
-  def historical(on:, only: nil, endpoint: nil)
-    endpoint ||= begin
-                   date = on.strftime '%Y-%m-%d'
-                   URI.join(BASE_PATH, 'historical/', "#{date}.json").tap { |uri|
-                     uri.query = "app_id=#{app_id}"
-                     uri.query += "&symbols=#{Array(only).join ','}" if only
-                   }
-                 end
+  def historical(on:)
+    endpoint = sources[:historical] || \
+      build_uri_endpoint('historical/', "#{on.strftime '%Y-%m-%d'}.json")
     call endpoint
   end
 
-  def currencies(endpoint: nil)
-    endpoint ||= URI.join(BASE_PATH, 'currencies.json').tap { |uri|
-      uri.query = "app_id=#{app_id}"
-    }
+  def currencies
+    endpoint = sources[:currencies] || build_uri_endpoint('currencies.json')
     call endpoint
   end
 
-  def usage(endpoint: nil)
-    endpoint ||= URI.join(BASE_PATH, 'usage.json').tap { |uri|
-      uri.query = "app_id=#{app_id}"
-    }
+  def usage
+    endpoint= sources[:usage] || build_uri_endpoint('usage.json')
     call endpoint
   end
 
   private
+
+  def build_uri_endpoint(*path, **params)
+    URI.join(BASE_PATH, *path).tap do |uri|
+      uri.query = "app_id=#{app_id}"
+    end
+  end
 
   def call(endpoint)
     JSON.load open endpoint
@@ -67,5 +61,17 @@ class OXR
     else
       raise
     end
+  end
+
+  def sources
+    self.class.sources
+  end
+
+  def self.sources
+    @sources ||= {}
+  end
+
+  def self.reset_sources
+    sources.clear
   end
 end

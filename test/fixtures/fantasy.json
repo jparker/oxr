@@ -1,0 +1,10 @@
+{
+  "disclaimer": "This is a bogus data for testing.",
+  "license": "THis is bogus data for testing.",
+  "timestamp": 1459016273,
+  "base": "USD",
+  "rates": {
+    "GBP": 42,
+    "USD": 1
+  }
+}
