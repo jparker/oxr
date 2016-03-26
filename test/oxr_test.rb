@@ -5,6 +5,15 @@ class OXRTest < Minitest::Test
     refute_nil ::OXR::VERSION
   end
 
+  def test_index_shortcut
+    stub_request(:get, "#{OXR::BASE_PATH}latest.json?app_id=XXX")
+      .to_return status: 200, body: File.open('test/fixtures/latest.json')
+    oxr = OXR.new 'XXX'
+    assert_equal 1, oxr['USD']
+    assert_in_delta 0.703087, oxr['GBP']
+    assert_in_delta 111.7062, oxr['JPY']
+  end
+
   def test_latest
     stub_request(:get, "#{OXR::BASE_PATH}latest.json?app_id=XXX")
       .to_return status: 200, body: File.open('test/fixtures/latest.json')
@@ -13,7 +22,8 @@ class OXRTest < Minitest::Test
     refute_nil response['timestamp']
     assert_equal 'USD', response['base']
     assert_equal 1, response['rates']['USD']
-    refute_nil response['rates']['GBP']
+    assert_in_delta 0.703087, response['rates']['GBP']
+    assert_in_delta 111.7062, response['rates']['JPY']
   end
 
   def test_latest_with_custom_source
@@ -32,7 +42,8 @@ class OXRTest < Minitest::Test
     refute_nil response['timestamp']
     assert_equal 'USD', response['base']
     assert_equal 1, response['rates']['USD']
-    refute_nil response['rates']['GBP']
+    assert_in_delta 0.642607, response['rates']['GBP']
+    assert_in_delta 123.3267, response['rates']['JPY']
   end
 
   def test_historical_with_custom_source

@@ -22,6 +22,10 @@ class OXR
 
   attr_reader :app_id
 
+  def [](code)
+    latest['rates'][code]
+  end
+
   def latest
     endpoint = sources[:latest] || build_uri_endpoint('latest.json')
     call endpoint
