@@ -38,11 +38,37 @@ Get the latest conversion rates with `OXR#latest`.
 oxr.latest
 ```
 
+This will return a JSON object with a structure similar to the following:
+
+```json
+{
+  "disclaimer": "...",
+  "license": "...",
+  "timestamp": 1234567890,
+  "base": "USD",
+  "rates": {
+    "AED": 3.672995,
+    "AFN": 68.360001,
+    "ALL": 123.0332,
+    /* ... */
+  }
+}
+```
+
+`OXR#[]` is a shortcut for looking up the conversion rate for a single currency without digging through the JSON object returned by `OXR#latest` yourself.
+
+```ruby
+oxr['GBP'] # => 0.642607
+oxr['JPY'] # => 123.3267
+```
+
 Get historical conversion rates for specific dates with `OXR#historical`. This method requires you to provide a Date object for the date you wish to query.
 
 ```ruby
 oxr.historical on: Date.new(2016, 3, 24)
 ```
+
+This will return a JSON object with a structure similar to that returned by `OXR#latest`.
 
 Get a list of currently supported currencies with `OXR#currencies`.
 
