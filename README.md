@@ -2,7 +2,9 @@
 
 # OXR
 
-This gem provides a basic interface to the [Open Exchange Rates](https://openexchangerates.org) API.
+This gem provides a basic interface to the
+[Open Exchange Rates](https://openexchangerates.org) API. At present, only the
+API calls available to free plans have been implemented.
 
 ## Installation
 
@@ -51,7 +53,8 @@ OXR['GBP'] # => 0.703087
 ```
 
 `OXR.get_rate` accepts an optional keyword argument to retrieve historical
-conversion rates for given dates.
+exchange rates for given dates. The provided date should be an object which
+responds to `#strftime`.
 
 ```ruby
 OXR.get_rate 'GBP', on: Date.new(2015, 6, 14) # => 0.642607
@@ -61,7 +64,7 @@ You perform more complex operations by using the lower-level API calls. These
 methods return the raw JSON responses returned by Open Exchange Rates (parsed
 using the [json](https://rubygems.org/gems/json) gem).
 
-Get the latest conversion rates with `OXR#latest`.
+Get the latest exchange rates with `OXR#latest`.
 
 ```ruby
 OXR.latest
@@ -80,12 +83,16 @@ This will return a JSON object with a structure similar to the following:
     "AFN": 68.360001,
     "ALL": 123.0332,
     /* … */
+    "ZMK": 5252.024745,
+    "ZMW": 11.332275,
+    "ZWL": 322.387247
   }
 }
 ```
 
-Get historical conversion rates for specific dates with `OXR#historical`. This
-method requires you to provide a Date object for the date you wish to query.
+Get historical exchange rates for specific dates with `OXR#historical`. This
+method requires you to provide the date you wish to lookup. The date argument
+should respond to `#strftime`.
 
 ```ruby
 OXR.historical on: Date.new(2016, 3, 24)
@@ -93,13 +100,14 @@ OXR.historical on: Date.new(2016, 3, 24)
 
 This will return a JSON object with a structure similar to that returned by `OXR#latest`.
 
-Get a list of currently supported currencies with `OXR#currencies`.
+Get a list of available currencies with `OXR#currencies`.
 
 ```ruby
 OXR.currencies
 ```
 
-Get information about your account (including your usage for the current period) with `OXR#usage`.
+Get information about your account including your usage for the current period
+with `OXR#usage`.
 
 ```ruby
 OXR.usage
@@ -115,13 +123,9 @@ instead of an HTTP request. Just provide a JSON file that reflects the payload
 of an actual API call. (You will find usable JSON files in test/fixtures
 included with this gem.)
 
-```ruby
-OXR.configure do |config|
-  config.latest = File.join 'test', 'fixtures', 'sample.json'
-end
-```
-
 When you're done, you can call `OXR.reset_sources` to restore the default behavior.
+
+Below is an example of configuring OXR within a test.
 
 ```ruby
 class SomeTest < Minitest::Test
