@@ -25,11 +25,12 @@ module OXR
 
   class << self
     def get_rate(code, on: nil)
-      if on
-        historical(on: on).dig 'rates', code.to_s
-      else
-        latest.dig 'rates', code.to_s
-      end
+      data = if on
+               historical on: on
+             else
+               latest
+             end
+      data['rates'][code.to_s]
     end
 
     alias_method :[], :get_rate
