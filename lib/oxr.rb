@@ -24,6 +24,15 @@ module OXR
   end
 
   class << self
+    def new(app_id)
+      warn '[DEPRECATION WARNING] OXR.new is depr4ecated.' \
+        " Use OXR class methods instead (from #{caller.first})."
+      configure do |config|
+        config.app_id = app_id
+      end
+      self
+    end
+
     def get_rate(code, on: nil)
       data = if on
                historical on: on
