@@ -28,7 +28,7 @@ If you have not done so already, sign up for account on
 [Open Exchange Rates](https://openexchangerates.org). Once you have an account,
 go to Your Dashboard and locate your App ID.
 
-Configure OXR with your App ID by calling OXR.configure:
+Configure OXR with your App ID by calling `OXR.configure`:
 
 ```ruby
 OXR.configure do |config|
@@ -142,6 +142,29 @@ end
 ```
 
 (You might consider doing this in your development environment as well.)
+
+## Upgrading
+
+The interface has changed between the 0.2.0 and 0.3.0 tags. It is no longer
+necessary to instantiate an OXR object. The API calls are available as class
+methods directly on the OXR module.
+
+```ruby
+# Before
+oxr = OXR.new 'YOUR_APP_ID'
+oxr['JPY']
+oxr.usage
+
+# Now
+OXR.configure do |config|
+  config.app_id = 'YOUR_APP_ID'
+end
+OXR['JPY']
+OXR.usage
+```
+
+(You can still call `OXR.new`, but this behavior will generate a deprecation
+warning.)
 
 ## Development
 
