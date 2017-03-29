@@ -1,81 +1,76 @@
-require "oxr/version"
+require 'oxr/version'
+require 'oxr/configuration'
 
 require 'date'
 require 'json'
 require 'open-uri'
 
-class OXR
-  BASE_PATH = 'https://openexchangerates.org/api/'.freeze
+module OXR
+  class Error < StandardError
+  end
 
-  class OXRError < StandardError
-    def initialize(message, response)
-      super message
-      @response = response
+  class ApiError < Error
+    def message
+      cause.message
     end
 
-    attr_reader :response
-  end
+    def description
+      response['description']
+    end
 
-  def initialize(app_id)
-    @app_id = app_id
-  end
-
-  attr_reader :app_id
-
-  def [](code)
-    latest['rates'][code]
-  end
-
-  def latest
-    endpoint = sources[:latest] || build_uri_endpoint('latest.json')
-    call endpoint
-  end
-
-  def historical(on:)
-    endpoint = sources[:historical] || \
-      build_uri_endpoint('historical/', "#{on.strftime '%Y-%m-%d'}.json")
-    call endpoint
-  end
-
-  def currencies
-    endpoint = sources[:currencies] || build_uri_endpoint('currencies.json')
-    call endpoint
-  end
-
-  def usage
-    endpoint= sources[:usage] || build_uri_endpoint('usage.json')
-    call endpoint
-  end
-
-  private
-
-  def build_uri_endpoint(*path, **params)
-    URI.join(BASE_PATH, *path).tap do |uri|
-      uri.query = "app_id=#{app_id}"
+    def response
+      @response ||= JSON.load cause.io
     end
   end
 
-  def call(endpoint)
-    JSON.load open endpoint
-  rescue OpenURI::HTTPError => e
-    case e.message
-    when /\A4[[:digit:]]{2}/
-      response = JSON.load e.io
-      raise OXRError.new response['description'], response
-    else
-      raise
+  class << self
+    def get_rate(code, on: nil)
+      if on
+        historical(on: on).dig 'rates', code.to_s
+      else
+        latest.dig 'rates', code.to_s
+      end
     end
-  end
 
-  def sources
-    self.class.sources
-  end
+    alias_method :[], :get_rate
 
-  def self.sources
-    @sources ||= {}
-  end
+    def currencies
+      call configuration.currencies
+    end
 
-  def self.reset_sources
-    sources.clear
+    def historical(on:)
+      call configuration.historical on
+    end
+
+    def latest
+      call configuration.latest
+    end
+
+    def usage
+      call configuration.usage
+    end
+
+    def reset_sources
+      configure do |config|
+        config.reset_sources
+      end
+    end
+
+    def configure
+      yield configuration if block_given?
+      configuration
+    end
+
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    private
+
+    def call(endpoint)
+      JSON.load open endpoint
+    rescue OpenURI::HTTPError => e
+      raise ApiError.new e
+    end
   end
 end

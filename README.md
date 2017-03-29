@@ -22,50 +22,73 @@ Or install it yourself as:
 
 ## Usage
 
-If you have not done so already, sign up for account on [Open Exchange Rates](https://openexchangerates.org). Once you have an account, go to Your Dashboard and locate your App ID.
+If you have not done so already, sign up for account on
+[Open Exchange Rates](https://openexchangerates.org). Once you have an account,
+go to Your Dashboard and locate your App ID.
 
-Instantiate a new OXR object, passing your App ID as an argument.
+Configure OXR with your App ID by calling OXR.configure:
 
 ```ruby
-oxr = OXR.new 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+OXR.configure do |config|
+  config.app_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+end
 ```
 
-The Open Exchange Rates API returns results as JSON objects. OXR parses these (using the [json](https://rubygems.org/gems/json) gem) and returns the resulting Hashes. To see the exact structure of the responses for different queries, check the [Open Exchange Rates documentation](https://docs.openexchangerates.org/) or examine the sample responses in `test/fixtures`.
+(If you are using OXR within a Rails application, you will probably want to put
+this in an initializer.)
+
+You can get current exchange rates using `OXR.get_rate`:
+
+```ruby
+OXR.get_rate 'GBP' # => 0.703087
+OXR.get_rate 'JPY' # => 111.7062
+```
+
+You can also use the `OXR.[]` shortcut method.
+
+```ruby
+OXR['GBP'] # => 0.703087
+```
+
+`OXR.get_rate` accepts an optional keyword argument to retrieve historical
+conversion rates for given dates.
+
+```ruby
+OXR.get_rate 'GBP', on: Date.new(2015, 6, 14) # => 0.642607
+```
+
+You perform more complex operations by using the lower-level API calls. These
+methods return the raw JSON responses returned by Open Exchange Rates (parsed
+using the [json](https://rubygems.org/gems/json) gem).
 
 Get the latest conversion rates with `OXR#latest`.
 
 ```ruby
-oxr.latest
+OXR.latest
 ```
 
 This will return a JSON object with a structure similar to the following:
 
 ```json
 {
-  "disclaimer": "...",
-  "license": "...",
+  "disclaimer": "…",
+  "license": "…",
   "timestamp": 1234567890,
   "base": "USD",
   "rates": {
     "AED": 3.672995,
     "AFN": 68.360001,
     "ALL": 123.0332,
-    /* ... */
+    /* … */
   }
 }
 ```
 
-`OXR#[]` is a shortcut for looking up the conversion rate for a single currency without digging through the JSON object returned by `OXR#latest` yourself.
+Get historical conversion rates for specific dates with `OXR#historical`. This
+method requires you to provide a Date object for the date you wish to query.
 
 ```ruby
-oxr['GBP'] # => 0.642607
-oxr['JPY'] # => 123.3267
-```
-
-Get historical conversion rates for specific dates with `OXR#historical`. This method requires you to provide a Date object for the date you wish to query.
-
-```ruby
-oxr.historical on: Date.new(2016, 3, 24)
+OXR.historical on: Date.new(2016, 3, 24)
 ```
 
 This will return a JSON object with a structure similar to that returned by `OXR#latest`.
@@ -73,37 +96,48 @@ This will return a JSON object with a structure similar to that returned by `OXR
 Get a list of currently supported currencies with `OXR#currencies`.
 
 ```ruby
-oxr.currencies
+OXR.currencies
 ```
 
 Get information about your account (including your usage for the current period) with `OXR#usage`.
 
 ```ruby
-oxr.usage
+OXR.usage
 ```
 
 ## Testing
 
-Normally, any API call will result in a live request to Open Exchange Rates. This probably isn't what you want when you're running tests. You can optionally stub the responses of specific API calls by adding an entry to `OXR.sources`. If you want to stop using custom sources, you can restore normal behavior by calling `OXR.reset_sources`. For example:
+Normally, any API call will send a request to Open Exchange Rates. Since your
+plan allows a limited number of requests per month, you probably want to avoid
+this when running in a test environment. You can stub the responses of specific
+API calls by configuring the endpoint for specific calls to use a local file
+instead of an HTTP request. Just provide a JSON file that reflects the payload
+of an actual API call. (You will find usable JSON files in test/fixtures
+included with this gem.)
+
+```ruby
+OXR.configure do |config|
+  config.latest = File.join 'test', 'fixtures', 'sample.json'
+end
+```
+
+When you're done, you can call `OXR.reset_sources` to restore the default behavior.
 
 ```ruby
 class SomeTest < Minitest::Test
   def setup
-    OXR.sources[:latest] = 'test/fixtures/sample_data.json'
+    OXR.configure do |config|
+      config.latest = 'test/fixtures/sample.json'
+    end
   end
 
   def teardown
     OXR.reset_sources
   end
-
-  def test_something
-    oxr = OXR.new('XXX')
-    assert_equal 42, oxr.latest['rates']['GBP']
-  end
 end
 ```
 
-In this example `test/fixtures/sample_data.json` should contain JSON data matching the structure of an actual Open Exchange Rates response. If you want to stop using custom sources, you can restore normal behavior by calling `OXR.reset_sources`.
+(You might consider doing this in your development environment as well.)
 
 ## Development
 
