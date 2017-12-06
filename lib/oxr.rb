@@ -25,7 +25,7 @@ module OXR
 
   class << self
     def new(app_id)
-      warn '[DEPRECATION WARNING] OXR.new is depr4ecated.' \
+      warn '[DEPRECATION WARNING] OXR.new is deprecated.' \
         " Use OXR class methods instead (from #{caller.first})."
       configure do |config|
         config.app_id = app_id
