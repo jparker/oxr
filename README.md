@@ -33,6 +33,7 @@ Configure OXR with your App ID by calling `OXR.configure`:
 ```ruby
 OXR.configure do |config|
   config.app_id = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  # config.base = 'USD'
 end
 ```
 
@@ -72,20 +73,21 @@ OXR.latest
 
 This will return a JSON object with a structure similar to the following:
 
-```json
+```ruby
 {
-  "disclaimer": "…",
-  "license": "…",
-  "timestamp": 1234567890,
-  "base": "USD",
-  "rates": {
-    "AED": 3.672995,
-    "AFN": 68.360001,
-    "ALL": 123.0332,
-    /* … */
-    "ZMK": 5252.024745,
-    "ZMW": 11.332275,
-    "ZWL": 322.387247
+ "disclaimer"=>"Usage subject to terms: https://openexchangerates.org/terms",
+ "license"=>"https://openexchangerates.org/license",
+ "timestamp"=>1512842416,
+ "base"=>"USD",
+ "rates"=>
+  {
+    "AED"=>3.673097,
+    "AFN"=>68.693,
+    "ALL"=>113.595865,
+    # ...
+    "ZAR"=>13.65526, 
+    "ZMW"=>10.243477,
+    "ZWL"=>322.355011
   }
 }
 ```
