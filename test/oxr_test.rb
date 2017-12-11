@@ -71,7 +71,7 @@ class OXRTest < Minitest::Test
       config.base = 'EUR'
     end
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX&base=EUR')
-        .to_return status: 200, body: File.open(fixture('latest_custom_base.json'))
+      .to_return status: 200, body: File.open(fixture('latest_custom_base.json'))
     response = OXR.latest
     refute_nil response['timestamp']
     assert_equal 'EUR', response['base']
@@ -101,7 +101,7 @@ class OXRTest < Minitest::Test
       config.base = 'EUR'
     end
     stub_request(:get, 'https://openexchangerates.org/api/historical/2017-12-05.json?app_id=XXX&base=EUR')
-        .to_return status: 200, body: File.open(fixture('historical_custom_base.json'))
+      .to_return status: 200, body: File.open(fixture('historical_custom_base.json'))
     response = OXR.historical on: Date.new(2017, 12, 5)
     refute_nil response['timestamp']
     assert_equal 'EUR', response['base']
@@ -128,7 +128,8 @@ class OXRTest < Minitest::Test
 
   def test_missing_app_id
     OXR.configure do |config|
-      @app_id, config.app_id = config.app_id, nil
+      @app_id = config.app_id
+      config.app_id = nil
     end
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=')
       .to_return status: 401, body: File.open(fixture('missing_app_id.json'))
@@ -165,7 +166,7 @@ class OXRTest < Minitest::Test
       config.base = 'XXX'
     end
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX&base=XXX')
-        .to_return status: 400, body: File.open(fixture('invalid_base.json'))
+      .to_return status: 400, body: File.open(fixture('invalid_base.json'))
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Invalid `base` currency \[XXX\]/, error.description)
     assert_equal 'invalid_base', error.response['message']
