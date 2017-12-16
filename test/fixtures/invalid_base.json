@@ -1,6 +1,6 @@
 {
   "error": true,
-  "status": 401,
-  "message": "invalid_app_id",
-  "description": "Invalid App ID provided. Please sign up at https://openexchangerates.org/signup, or contact support@openexchangerates.org."
+  "status": 400,
+  "message": "invalid_base",
+  "description": "Invalid `base` currency [XXX]. Please ensure you use the standard international code, and that it is supported by the API. See our documentation for details: https://openexchangerates.org/documentation/."
 }

@@ -19,14 +19,14 @@ module OXR
     end
 
     def response
-      @response ||= JSON.load cause.io
+      @response ||= JSON.parse cause.io.read
     end
   end
 
   class << self
     def new(app_id)
-      warn '[DEPRECATION WARNING] OXR.new is depr4ecated.' \
-        " Use OXR class methods instead (from #{caller.first})."
+      warn '[DEPRECATION WARNING] OXR.new is deprecated.' \
+        " Use OXR class methods instead (from #{caller(1..1).first})."
       configure do |config|
         config.app_id = app_id
       end
@@ -42,7 +42,7 @@ module OXR
       data['rates'][code.to_s]
     end
 
-    alias_method :[], :get_rate
+    alias [] get_rate
 
     def currencies
       call configuration.currencies
@@ -61,9 +61,7 @@ module OXR
     end
 
     def reset_sources
-      configure do |config|
-        config.reset_sources
-      end
+      configure(&:reset_sources)
     end
 
     def configure
@@ -78,9 +76,9 @@ module OXR
     private
 
     def call(endpoint)
-      JSON.load open endpoint
+      JSON.parse(open(endpoint).read)
     rescue OpenURI::HTTPError => e
-      raise ApiError.new e
+      raise ApiError, e
     end
   end
 end
