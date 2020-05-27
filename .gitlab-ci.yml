@@ -1,0 +1,9 @@
+image: "ruby:2.6"
+
+before_script:
+  - gem install bundler --no-document -v '~> 1.17.3'
+  - bundle install -j "$(nproc)"
+
+test:
+  script:
+    - bundle exec rake test
