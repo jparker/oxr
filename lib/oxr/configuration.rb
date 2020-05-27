@@ -7,6 +7,10 @@ module OXR
     attr_accessor :app_id, :base
     attr_writer :currencies, :historical, :latest, :usage
 
+    def initialize
+      reset_sources
+    end
+
     def currencies
       @currencies || URI.join(ENDPOINT, 'currencies.json').tap do |uri|
         uri.query = "app_id=#{app_id}"

@@ -19,14 +19,14 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 2.1'
+  spec.required_ruby_version = '>= 2.3'
 
   spec.add_development_dependency 'bundler', '~> 1.11'
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'minitest-focus'
   spec.add_development_dependency 'pry'
-  spec.add_development_dependency 'rake', '~> 10.0'
-  spec.add_development_dependency 'webmock', '~> 2.3'
+  spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'webmock', '~> 3.0'
 
   spec.add_dependency 'json'
 end
