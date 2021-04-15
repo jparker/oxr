@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'oxr/version'
 require 'oxr/configuration'
 
