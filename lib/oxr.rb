@@ -76,7 +76,7 @@ module OXR
     private
 
     def call(endpoint)
-      JSON.parse(open(endpoint).read)
+      JSON.parse(URI.open(endpoint).read)
     rescue OpenURI::HTTPError => e
       raise ApiError, e
     end

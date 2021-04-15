@@ -1,9 +1,22 @@
-image: "ruby:2.6"
-
 before_script:
-  - gem install bundler --no-document -v '~> 1.17.3'
-  - bundle install -j "$(nproc)"
 
-test:
+test:ruby-2.6:
+  image: "ruby:2.6"
   script:
+    - gem install bundler --no-document -v '~> 2.2.15'
+    - bundle install --jobs="$(nproc)" --retry=3
+    - bundle exec rake test
+
+test:ruby-2.7:
+  image: "ruby:2.7"
+  script:
+    - gem install bundler --no-document -v '~> 2.2.15'
+    - bundle install --jobs="$(nproc)" --retry=3
+    - bundle exec rake test
+
+test:ruby-3.0:
+  image: "ruby:3.0"
+  script:
+    - gem install bundler --no-document -v '~> 2.2.15'
+    - bundle install --jobs="$(nproc)" --retry=3
     - bundle exec rake test
