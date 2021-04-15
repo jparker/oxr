@@ -2,6 +2,7 @@
 
 require 'test_helper'
 
+# rubocop:disable Metrics/ClassLength
 class OXRTest < Minitest::Test
   def setup
     OXR.configure do |config|
@@ -18,7 +19,8 @@ class OXRTest < Minitest::Test
 
   def test_get_rate
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('latest.json'))
+      .to_return status: 200, body: File.open(fixture_path('latest.json'))
+
     assert_equal 1, OXR.get_rate('USD')
     assert_in_delta 0.703087, OXR.get_rate('GBP')
     assert_in_delta 111.7062, OXR.get_rate('JPY')
@@ -26,14 +28,16 @@ class OXRTest < Minitest::Test
 
   def test_get_rate_with_date
     stub_request(:get, 'https://openexchangerates.org/api/historical/2015-06-14.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('historical.json'))
+      .to_return status: 200, body: File.open(fixture_path('historical.json'))
+
     assert_equal 1, OXR.get_rate('USD', on: Date.new(2015, 6, 14))
     assert_in_delta 0.642607, OXR.get_rate('GBP', on: Date.new(2015, 6, 14))
   end
 
   def test_get_rate_alias
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('latest.json'))
+      .to_return status: 200, body: File.open(fixture_path('latest.json'))
+
     assert_equal 1, OXR['USD']
     assert_in_delta 0.703087, OXR['GBP']
     assert_in_delta 111.7062, OXR['JPY']
@@ -41,20 +45,21 @@ class OXRTest < Minitest::Test
 
   def test_get_rate_with_currency_as_symbol
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('latest.json'))
+      .to_return status: 200, body: File.open(fixture_path('latest.json'))
     assert_equal 1, OXR[:USD]
   end
 
   def test_get_rate_with_invalid_currency
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('latest.json'))
+      .to_return status: 200, body: File.open(fixture_path('latest.json'))
     assert_nil OXR['bogus']
   end
 
   def test_latest
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('latest.json'))
+      .to_return status: 200, body: File.open(fixture_path('latest.json'))
     response = OXR.latest
+
     refute_nil response['timestamp']
     assert_equal 'USD', response['base']
     assert_equal 1, response['rates']['USD']
@@ -62,9 +67,10 @@ class OXRTest < Minitest::Test
 
   def test_latest_with_custom_source
     OXR.configure do |config|
-      config.latest = fixture 'fantasy.json'
+      config.latest = fixture_path 'fantasy.json'
     end
     response = OXR.latest
+
     assert_equal 42, response['rates']['GBP']
   end
 
@@ -73,8 +79,9 @@ class OXRTest < Minitest::Test
       config.base = 'EUR'
     end
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX&base=EUR')
-      .to_return status: 200, body: File.open(fixture('latest_custom_base.json'))
+      .to_return status: 200, body: File.open(fixture_path('latest_custom_base.json'))
     response = OXR.latest
+
     refute_nil response['timestamp']
     assert_equal 'EUR', response['base']
     assert_equal 1, response['rates']['EUR']
@@ -82,8 +89,9 @@ class OXRTest < Minitest::Test
 
   def test_historical
     stub_request(:get, 'https://openexchangerates.org/api/historical/2015-06-14.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('historical.json'))
+      .to_return status: 200, body: File.open(fixture_path('historical.json'))
     response = OXR.historical on: Date.new(2015, 6, 14)
+
     refute_nil response['timestamp']
     assert_equal 'USD', response['base']
     assert_equal 1, response['rates']['USD']
@@ -92,9 +100,10 @@ class OXRTest < Minitest::Test
 
   def test_historical_with_custom_source
     OXR.configure do |config|
-      config.historical = fixture 'fantasy.json'
+      config.historical = fixture_path 'fantasy.json'
     end
     response = OXR.historical on: Date.new(2015, 6, 14)
+
     assert_equal 42, response['rates']['GBP']
   end
 
@@ -103,8 +112,9 @@ class OXRTest < Minitest::Test
       config.base = 'EUR'
     end
     stub_request(:get, 'https://openexchangerates.org/api/historical/2017-12-05.json?app_id=XXX&base=EUR')
-      .to_return status: 200, body: File.open(fixture('historical_custom_base.json'))
+      .to_return status: 200, body: File.open(fixture_path('historical_custom_base.json'))
     response = OXR.historical on: Date.new(2017, 12, 5)
+
     refute_nil response['timestamp']
     assert_equal 'EUR', response['base']
     assert_equal 1, response['rates']['EUR']
@@ -113,41 +123,41 @@ class OXRTest < Minitest::Test
 
   def test_currencies
     stub_request(:get, 'https://openexchangerates.org/api/currencies.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('currencies.json'))
+      .to_return status: 200, body: File.open(fixture_path('currencies.json'))
     response = OXR.currencies
+
     assert_equal 'British Pound Sterling', response['GBP']
     assert_equal 'United States Dollar', response['USD']
   end
 
   def test_usage
     stub_request(:get, 'https://openexchangerates.org/api/usage.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture('usage.json'))
+      .to_return status: 200, body: File.open(fixture_path('usage.json'))
     response = OXR.usage
+
     refute_nil response['data']['usage']['requests']
     refute_nil response['data']['usage']['requests_quota']
     refute_nil response['data']['usage']['requests_remaining']
   end
 
   def test_missing_app_id
-    OXR.configure do |config|
-      @app_id = config.app_id
-      config.app_id = nil
-    end
+    original_app_id = OXR.configuration.app_id
+    OXR.configure { |c| c.app_id = nil }
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=')
-      .to_return status: 401, body: File.open(fixture('missing_app_id.json'))
+      .to_return status: 401, body: File.open(fixture_path('missing_app_id.json'))
+
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/No App ID provided/, error.description)
     assert_equal 'missing_app_id', error.response['message']
     assert_equal 401, error.response['status']
   ensure
-    OXR.configure do |config|
-      config.app_id = @app_id
-    end
+    OXR.configure { |c| c.app_id = original_app_id }
   end
 
   def test_invalid_app_id
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 401, body: File.open(fixture('invalid_app_id.json'))
+      .to_return status: 401, body: File.open(fixture_path('invalid_app_id.json'))
+
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Invalid App ID/, error.description)
     assert_equal 'invalid_app_id', error.response['message']
@@ -156,7 +166,8 @@ class OXRTest < Minitest::Test
 
   def test_access_restricted
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 429, body: File.open(fixture('access_restricted.json'))
+      .to_return status: 429, body: File.open(fixture_path('access_restricted.json'))
+
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Access restricted/, error.description)
     assert_equal 'access_restricted', error.response['message']
@@ -168,14 +179,16 @@ class OXRTest < Minitest::Test
       config.base = 'XXX'
     end
     stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX&base=XXX')
-      .to_return status: 400, body: File.open(fixture('invalid_base.json'))
+      .to_return status: 400, body: File.open(fixture_path('invalid_base.json'))
+
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Invalid `base` currency \[XXX\]/, error.description)
     assert_equal 'invalid_base', error.response['message']
     assert_equal 400, error.response['status']
   end
 
-  def fixture(file)
+  def fixture_path(file)
     File.expand_path File.join('fixtures', file), __dir__
   end
 end
+# rubocop:enable Metrics/ClassLength

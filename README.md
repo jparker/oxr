@@ -65,7 +65,7 @@ You perform more complex operations by using the lower-level API calls. These
 methods return the raw JSON responses returned by Open Exchange Rates (parsed
 using the [json](https://rubygems.org/gems/json) gem).
 
-Get the latest exchange rates with `OXR#latest`.
+Get the latest exchange rates with `OXR.latest`.
 
 ```ruby
 OXR.latest
@@ -92,7 +92,7 @@ This will return a JSON object with a structure similar to the following:
 }
 ```
 
-Get historical exchange rates for specific dates with `OXR#historical`. This
+Get historical exchange rates for specific dates with `OXR.historical`. This
 method requires you to provide the date you wish to lookup. The date argument
 should respond to `#strftime`.
 
@@ -100,16 +100,16 @@ should respond to `#strftime`.
 OXR.historical on: Date.new(2016, 3, 24)
 ```
 
-This will return a JSON object with a structure similar to that returned by `OXR#latest`.
+This will return a JSON object with a structure similar to that returned by `OXR.latest`.
 
-Get a list of available currencies with `OXR#currencies`.
+Get a list of available currencies with `OXR.currencies`.
 
 ```ruby
 OXR.currencies
 ```
 
 Get information about your account including your usage for the current period
-with `OXR#usage`.
+with `OXR.usage`.
 
 ```ruby
 OXR.usage
