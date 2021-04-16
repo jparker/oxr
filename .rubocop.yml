@@ -6,6 +6,3 @@ AllCops:
   NewCops: enable
   SuggestExtensions: false
   TargetRubyVersion: 2.5
-Metrics/AbcSize:
-  Exclude:
-    - test/oxr_test.rb

@@ -2,161 +2,26 @@
 
 require 'test_helper'
 
-# rubocop:disable Metrics/ClassLength
 class OXRTest < Minitest::Test
-  def setup
-    OXR.configure do |config|
-      config.app_id = 'XXX'
-    end
-  end
-
-  def teardown
-    OXR.reset_sources
-    OXR.configure do |config|
-      config.base = nil
-    end
-  end
-
-  def test_get_rate
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('latest.json'))
-
-    assert_equal 1, OXR.get_rate('USD')
-    assert_in_delta 0.703087, OXR.get_rate('GBP')
-    assert_in_delta 111.7062, OXR.get_rate('JPY')
-  end
-
-  def test_get_rate_with_date
-    stub_request(:get, 'https://openexchangerates.org/api/historical/2015-06-14.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('historical.json'))
-
-    assert_equal 1, OXR.get_rate('USD', on: Date.new(2015, 6, 14))
-    assert_in_delta 0.642607, OXR.get_rate('GBP', on: Date.new(2015, 6, 14))
-  end
-
-  def test_get_rate_alias
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('latest.json'))
-
-    assert_equal 1, OXR['USD']
-    assert_in_delta 0.703087, OXR['GBP']
-    assert_in_delta 111.7062, OXR['JPY']
-  end
-
-  def test_get_rate_with_currency_as_symbol
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('latest.json'))
-    assert_equal 1, OXR[:USD]
-  end
-
-  def test_get_rate_with_invalid_currency
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('latest.json'))
-    assert_nil OXR['bogus']
-  end
-
-  def test_latest
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('latest.json'))
-    response = OXR.latest
-
-    refute_nil response['timestamp']
-    assert_equal 'USD', response['base']
-    assert_equal 1, response['rates']['USD']
-  end
-
-  def test_latest_with_custom_source
-    OXR.configure do |config|
-      config.latest = fixture_path 'fantasy.json'
-    end
-    response = OXR.latest
-
-    assert_equal 42, response['rates']['GBP']
-  end
-
-  def test_latest_with_base
-    OXR.configure do |config|
-      config.base = 'EUR'
-    end
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX&base=EUR')
-      .to_return status: 200, body: File.open(fixture_path('latest_custom_base.json'))
-    response = OXR.latest
-
-    refute_nil response['timestamp']
-    assert_equal 'EUR', response['base']
-    assert_equal 1, response['rates']['EUR']
-  end
-
-  def test_historical
-    stub_request(:get, 'https://openexchangerates.org/api/historical/2015-06-14.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('historical.json'))
-    response = OXR.historical on: Date.new(2015, 6, 14)
-
-    refute_nil response['timestamp']
-    assert_equal 'USD', response['base']
-    assert_equal 1, response['rates']['USD']
-    assert_in_delta 0.642607, response['rates']['GBP']
-  end
-
-  def test_historical_with_custom_source
-    OXR.configure do |config|
-      config.historical = fixture_path 'fantasy.json'
-    end
-    response = OXR.historical on: Date.new(2015, 6, 14)
-
-    assert_equal 42, response['rates']['GBP']
-  end
-
-  def test_historical_with_base
-    OXR.configure do |config|
-      config.base = 'EUR'
-    end
-    stub_request(:get, 'https://openexchangerates.org/api/historical/2017-12-05.json?app_id=XXX&base=EUR')
-      .to_return status: 200, body: File.open(fixture_path('historical_custom_base.json'))
-    response = OXR.historical on: Date.new(2017, 12, 5)
-
-    refute_nil response['timestamp']
-    assert_equal 'EUR', response['base']
-    assert_equal 1, response['rates']['EUR']
-    assert_in_delta 0.881934, response['rates']['GBP']
-  end
-
-  def test_currencies
-    stub_request(:get, 'https://openexchangerates.org/api/currencies.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('currencies.json'))
-    response = OXR.currencies
-
-    assert_equal 'British Pound Sterling', response['GBP']
-    assert_equal 'United States Dollar', response['USD']
-  end
-
-  def test_usage
-    stub_request(:get, 'https://openexchangerates.org/api/usage.json?app_id=XXX')
-      .to_return status: 200, body: File.open(fixture_path('usage.json'))
-    response = OXR.usage
-
-    refute_nil response['data']['usage']['requests']
-    refute_nil response['data']['usage']['requests_quota']
-    refute_nil response['data']['usage']['requests_remaining']
-  end
-
+  # rubocop:disable Metrics/AbcSize
   def test_missing_app_id
-    original_app_id = OXR.configuration.app_id
-    OXR.configure { |c| c.app_id = nil }
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=')
-      .to_return status: 401, body: File.open(fixture_path('missing_app_id.json'))
+    OXR.configure { |config| config.app_id = nil }
+    response = File.expand_path './fixtures/missing_app_id.json', __dir__
+    stub_request(:get, %r{\Ahttps://openexchangerates.org/api/.*})
+      .with(query: { 'app_id' => '' })
+      .to_return status: 401, body: File.open(response)
 
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/No App ID provided/, error.description)
     assert_equal 'missing_app_id', error.response['message']
     assert_equal 401, error.response['status']
-  ensure
-    OXR.configure { |c| c.app_id = original_app_id }
   end
+  # rubocop:enable Metrics/AbcSize
 
   def test_invalid_app_id
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 401, body: File.open(fixture_path('invalid_app_id.json'))
+    response = File.expand_path './fixtures/invalid_app_id.json', __dir__
+    stub_request(:get, %r{\Ahttps://openexchangerates.org/api/.*})
+      .to_return status: 401, body: File.open(response)
 
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Invalid App ID/, error.description)
@@ -165,8 +30,9 @@ class OXRTest < Minitest::Test
   end
 
   def test_access_restricted
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX')
-      .to_return status: 429, body: File.open(fixture_path('access_restricted.json'))
+    response = File.expand_path './fixtures/access_restricted.json', __dir__
+    stub_request(:get, %r{\Ahttps://openexchangerates.org/api/.*})
+      .to_return status: 429, body: File.open(response)
 
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Access restricted/, error.description)
@@ -174,21 +40,19 @@ class OXRTest < Minitest::Test
     assert_equal 429, error.response['status']
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_invalid_base
-    OXR.configure do |config|
-      config.base = 'XXX'
-    end
-    stub_request(:get, 'https://openexchangerates.org/api/latest.json?app_id=XXX&base=XXX')
-      .to_return status: 400, body: File.open(fixture_path('invalid_base.json'))
+    OXR.configure { |config| config.base = 'XXX' }
+    response = File.expand_path './fixtures/invalid_base.json', __dir__
+    stub_request(:get, %r{\Ahttps://openexchangerates.org/api/.*})
+      .to_return status: 400, body: File.open(response)
 
     error = assert_raises(OXR::ApiError) { OXR['USD'] }
     assert_match(/Invalid `base` currency \[XXX\]/, error.description)
     assert_equal 'invalid_base', error.response['message']
     assert_equal 400, error.response['status']
+  ensure
+    OXR.configure { |config| config.base = nil }
   end
-
-  def fixture_path(file)
-    File.expand_path File.join('fixtures', file), __dir__
-  end
+  # rubocop:enable Metrics/AbcSize
 end
-# rubocop:enable Metrics/ClassLength
