@@ -164,9 +164,13 @@ module OXR
     private
 
     def call(endpoint)
-      uri = URI.parse endpoint
-      data = uri.scheme ? uri.read : File.read(uri.path)
-      JSON.parse data
+      # This method makes it possible for a user to provide an endpoint path as
+      # either a String, Pathname, or URI. We will massage it until we have
+      # something that responds to #read.
+      endpoint = URI.parse(endpoint.to_s) unless endpoint.respond_to?(:read)
+      endpoint = File.open(endpoint.path) unless endpoint.respond_to?(:read)
+
+      JSON.parse endpoint.read
     rescue OpenURI::HTTPError => e
       raise ApiError, e
     end

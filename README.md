@@ -122,8 +122,9 @@ plan allows a limited number of requests per month, you probably want to avoid
 this when running in a test environment. You can stub the responses of specific
 API calls by configuring the endpoint for specific calls to use a local file
 instead of an HTTP request. Just provide a JSON file that reflects the payload
-of an actual API call. (You will find usable JSON files in test/fixtures
-included with this gem.)
+of an actual API call. You may provide this as a Pathname or a URI object, but
+a plain old String will work as well. (You will find usable JSON files in
+test/fixtures included with this gem.)
 
 When you're done, you can call `OXR.reset_sources` to restore the default behavior.
 

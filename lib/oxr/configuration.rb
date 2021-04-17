@@ -18,7 +18,11 @@ module OXR
   # you might want deterministic results and do not want to waste real API
   # requests.
   class Configuration
-    ENDPOINT = 'https://openexchangerates.org/api/'
+    ENDPOINT   = 'https://openexchangerates.org/api/'
+    LATEST     = URI.join(ENDPOINT, 'latest.json').freeze
+    HISTORICAL = URI.join(ENDPOINT, 'historical/').freeze
+    USAGE      = URI.join(ENDPOINT, 'usage.json').freeze
+    CURRENCIES = URI.join(ENDPOINT, 'currencies.json').freeze
 
     ##
     # Get and set the application ID that will be sent to the API server.
@@ -30,7 +34,10 @@ module OXR
 
     ##
     # Set respective API endpoints. Use these if you want to sidestep the API
-    # server, e.g., for testing.
+    # server, e.g., for testing. The endpoint may be provided as a URI,
+    # Pathname, or String.
+    #
+    # Setting an endpoint to +nil+ will restore the default value.
     attr_writer :currencies, :historical, :latest, :usage
 
     def initialize
@@ -40,9 +47,7 @@ module OXR
     ##
     # Returns the endpoint for listing known currencies.
     def currencies
-      @currencies || URI.join(ENDPOINT, 'currencies.json').tap do |uri|
-        uri.query = "app_id=#{app_id}"
-      end.to_s
+      @currencies || append_query(CURRENCIES)
     end
 
     ##
@@ -51,27 +56,19 @@ module OXR
     #
     # Expects +date+ to respond #strftime.
     def historical(date)
-      @historical || URI.join(ENDPOINT, "historical/#{date.strftime('%F')}.json").tap do |uri|
-        uri.query = "app_id=#{app_id}"
-        uri.query += "&base=#{base}" if base
-      end.to_s
+      @historical || append_query(URI.join(HISTORICAL, "#{date.strftime('%F')}.json"), base: base)
     end
 
     ##
     # Returns the endpoint for the latest currency exchange rates.
     def latest
-      @latest || URI.join(ENDPOINT, 'latest.json').tap do |uri|
-        uri.query = "app_id=#{app_id}"
-        uri.query += "&base=#{base}" if base
-      end.to_s
+      @latest || append_query(LATEST, base: base)
     end
 
     ##
     # Returns the endpoint for fetch current API usage statistics.
     def usage
-      @usage || URI.join(ENDPOINT, 'usage.json').tap do |uri|
-        uri.query = "app_id=#{app_id}"
-      end.to_s
+      @usage || append_query(USAGE)
     end
 
     ##
@@ -81,6 +78,15 @@ module OXR
       @historical = nil
       @latest     = nil
       @usage      = nil
+    end
+
+    private
+
+    def append_query(uri, base: nil)
+      uri.dup.tap do |u|
+        u.query = "app_id=#{app_id}"
+        u.query += "&base=#{base}" if base
+      end.to_s
     end
   end
 end
