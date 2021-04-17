@@ -1,3 +1,8 @@
+## OXR 0.6.1 (April 16, 2021) ##
+
+* Accept endpoints as Pathnames or URIs as well as Strings
+* Eliminated redundant URI processing for default endpoints
+
 ## OXR 0.6.0 (April 15, 2021) ##
 
 *   Now works on Ruby 3.0
