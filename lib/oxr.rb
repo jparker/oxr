@@ -87,7 +87,8 @@ module OXR
     # methods below to access the different API endpoints.
     def new(app_id)
       warn '[DEPRECATION] OXR.new is deprecated and will be removed from 0.7.' \
-        " Use OXR class methods instead (from #{caller(1..1).first})."
+           " Use OXR class methods instead (from #{caller(1..1).first})."
+
       configure do |config|
         config.app_id = app_id
       end
