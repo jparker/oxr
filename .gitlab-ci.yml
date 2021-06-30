@@ -4,9 +4,10 @@ before_script:
 
 build:rubocop:
   stage: build
+  allow_failure: true
   image: "ruby:3.0"
   script:
-    - bundle exec rubocop
+    - bundle exec rubocop --parallel
 
 test:ruby-2.6:
   stage: test
